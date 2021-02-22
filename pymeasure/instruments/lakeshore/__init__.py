@@ -25,3 +25,4 @@
 from .adapters import LakeShoreUSBAdapter
 from .lakeshore425 import LakeShore425
 from .lakeshore331 import LakeShore331
+from .lakeshore330 import LakeShore330
