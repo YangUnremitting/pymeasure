@@ -46,14 +46,14 @@ class Keithley2000(Instrument, KeithleyBuffer):
         print(meter.voltage)
 
     """
-    # MODES = {
-    #     'current':'CURR:DC', 'current ac':'CURR:AC',
-    #     'voltage':'VOLT:DC', 'voltage ac':'VOLT:AC',
-    #     'resistance':'RES', 'resistance 4W':'FRES',
-    #     'period':'PER', 'frequency':'FREQ',
-    #     'temperature':'TEMP', 'diode':'DIOD',
-    #     'continuity':'CONT'
-    # }
+    MODES = {
+        'current':'CURR:DC', 'current ac':'CURR:AC',
+        'voltage': 'VOLT:DC', 'voltage ac': 'VOLT:AC',
+        'resistance':'RES', 'resistance 4W':'FRES',
+        'period':'PER', 'frequency':'FREQ',
+        'temperature':'TEMP', 'diode':'DIOD',
+        'continuity':'CONT'
+    }
 
     mode = Instrument.control(
         ":CONF?", ":CONF:%s",
@@ -63,9 +63,7 @@ class Keithley2000(Instrument, KeithleyBuffer):
         :code:'resistance 4W' (4-wire), :code:'period', :code:'frequency',
         :code:'temperature', :code:'diode', and :code:'frequency'. """,
         validator=strict_discrete_set,
-        values={
-            "voltage": "VOLT:DC"
-        },
+        values=MODES,
         map_values=True,
         get_process=lambda v: v.replace('"', '')
     )
@@ -471,6 +469,29 @@ class Keithley2000(Instrument, KeithleyBuffer):
             self.mode = 'voltage'
             self.voltage_range = max_voltage
 
+    def measure_voltage_dc(self):
+        self.write(":CONF:VOLT:DC")
+
+    def clear_buffer(self):
+        self.write(":TRAC:CLE")
+
+    def buffer_size(self, size):
+        self.write(":TRAC:POIN {}".format(size))
+    
+    def buffer_storage(self):
+        self.write(":TRAC:FEED SENS")
+
+    def buffer_control(self):
+        self.write(":TRAC:FEED:CONT NEXT")
+
+    def init(self):
+        self.write(":INIT:CONT 1")
+
+    def datas(self):
+        """ Read data from buffer"""
+
+        return self.values(":TRAC:DATA?")
+
     def measure_current(self, max_current=10e-3, ac=False):
         """ Configures the instrument to measure current,
         based on a maximum current to set the range, and
@@ -608,8 +629,3 @@ class Keithley2000(Instrument, KeithleyBuffer):
         :param duration: A time in seconds between 0 and 7.9 seconds
         """
         self.write(":SYST:BEEP %g, %g" % (frequency, duration))
-
-    def datas(self):
-        """ Read data from buffer"""
-
-        return self.values(":TRAC:DATA?")

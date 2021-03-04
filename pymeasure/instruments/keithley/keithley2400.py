@@ -72,6 +72,16 @@ class Keithley2400(Instrument, KeithleyBuffer):
         map_values=True
     )
 
+    config_measurement = Instrument.control(
+        ":CONF?", ":CONF:%s",
+        """ Configures the instrument to a specific setup for measurements on the specified function""",
+        validator= strict_discrete_set,        
+        values={"Amps": "CURR:DC",
+                "Volts": "VOLT:DC",
+                "Ohms": "RES"},
+        map_values=True
+    )
+
     source_enabled = Instrument.control(
         "OUTPut?", "OUTPut %d",
         """A boolean property that controls whether the source is enabled, takes

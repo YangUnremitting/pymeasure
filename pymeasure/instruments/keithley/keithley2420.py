@@ -84,7 +84,92 @@ class Keithley2420(Instrument):
         validator=truncated_range,
         values=[1, 2500]
     )
+
+    source_mode = Instrument.control(
+        ":SOUR:FUNC?", ":SOUR:FUNC %s",
+        """ A string property that controls the source mode, which can
+        take the values 'current' or 'voltage'. The convenience methods
+        :meth:`~.Keithley2400.apply_current` and :meth:`~.Keithley2400.apply_voltage`
+        can also be used. """,
+        validator=strict_discrete_set,
+        values={'current': 'CURR', 'voltage': 'VOLT'},
+        map_values=True
+    )
     
+    source_enabled = Instrument.control(
+        "OUTPut?", "OUTPut %d",
+        """A boolean property that controls whether the source is enabled, takes
+        values True or False. The convenience methods :meth:`~.Keithley2400.enable_source` and
+        :meth:`~.Keithley2400.disable_source` can also be used.""",
+        validator=strict_discrete_set,
+        values={True: 1, False: 0},
+        map_values=True
+    )
+
+    source_current = Instrument.control(
+        ":SOUR:CURR?", ":SOUR:CURR:LEV %g",
+        """ A floating point property that controls the source current
+        in Amps. """,
+        validator=truncated_range,
+        values=[-1.05, 1.05]
+    )
+
+    source_current_range = Instrument.control(
+        ":SOUR:CURR:RANG?", ":SOUR:CURR:RANG:AUTO 0;:SOUR:CURR:RANG %g",
+        """ A floating point property that controls the source current
+        range in Amps, which can take values between -1.05 and +1.05 A.
+        Auto-range is disabled when this property is set. """,
+        validator=truncated_range,
+        values=[-1.05, 1.05]
+    )
+
+    compliance_voltage = Instrument.control(
+        ":SENS:VOLT:PROT?", ":SENS:VOLT:PROT %g",
+        """ A floating point property that controls the compliance voltage
+        in Volts. """,
+        validator=truncated_range,
+        values=[-210, 210]
+    )
+
+    current = Instrument.measurement(
+        ":READ?",
+        """ Reads the current in Amps, if configured for this reading.
+        """
+    )
+
+    source_voltage = Instrument.control(
+        ":SOUR:VOLT?", ":SOUR:VOLT:LEV %g",
+        """ A floating point property that controls the source voltage
+        in Volts. """,
+        validator=truncated_range,
+        values=[-10.05, 10.05]
+    )
+
+    source_voltage_range = Instrument.control(
+        ":SOUR:VOLT:RANG?", ":SOUR:VOLT:RANG:AUTO 0;:SOUR:VOLT:RANG %g",
+        """ A floating point property that controls the source voltage
+        range in Volts, which can take values from -210 to 210 V.
+        Auto-range is disabled when this property is set. """,
+        validator=truncated_range,
+        values=[-210, 210]
+    )
+
+    def measure_current(self, nplc=1, current=1.05e-4, auto_range=True):
+        """ Configures the measurement of current.
+
+        :param nplc: Number of power line cycles (NPLC) from 0.01 to 10
+        :param current: Upper limit of current in Amps, from -1.05 A to 1.05 A
+        :param auto_range: Enables auto_range if True, else uses the set current
+        """
+        log.info("%s is measuring current." % self.name)
+        self.write(":SENS:FUNC 'CURR';"
+                   ":SENS:CURR:NPLC %f;:FORM:ELEM CURR;" % nplc)
+        if auto_range:
+            self.write(":SENS:CURR:RANG:AUTO 1;")
+        else:
+            self.current_range = current
+        self.check_errors()
+        
     def initiate(self):
         """ A property that allow user to set the awaiting trigger state. """
         self.write(":INIT")
