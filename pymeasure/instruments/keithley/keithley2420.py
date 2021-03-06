@@ -131,6 +131,14 @@ class Keithley2420(Instrument):
         values=[-210, 210]
     )
 
+    compliance_current = Instrument.control(
+        ":SENS:CURR:PROT?", ":SENS:CURR:PROT %g",
+        """ A floating point property that controls the compliance current
+        in Amps. """,
+        validator=truncated_range,
+        values=[10e-9, 3.15]
+    )
+
     current = Instrument.measurement(
         ":READ?",
         """ Reads the current in Amps, if configured for this reading.
@@ -186,3 +194,13 @@ class Keithley2420(Instrument):
         """ Returns True if the buffer is full of measurements. """
         status_bit = int(self.ask("*STB?"))
         return status_bit == 65
+
+    def enable_source(self):
+        """ Enables the source of current or voltage depending on the
+        configuration of the instrument. """
+        self.write("OUTPUT ON")
+
+    def disable_source(self):
+        """ Disables the source of current or voltage depending on the
+        configuration of the instrument. """
+        self.write("OUTPUT OFF")
