@@ -37,7 +37,7 @@ class LI5660(Instrument):
     def __init__(self, resourceName, **kwargs):
         super().__init__(
             resourceName,
-            "NF Lock-In Amplifier LI5600",
+            "NF Lock-In Amplifier LI5660",
             **kwargs
         )
 

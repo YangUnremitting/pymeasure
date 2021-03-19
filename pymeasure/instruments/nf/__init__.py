@@ -23,3 +23,4 @@
 #
 
 from .li5660 import LI5660
+from .li5640 import LI5640

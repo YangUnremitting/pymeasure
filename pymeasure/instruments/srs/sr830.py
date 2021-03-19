@@ -257,6 +257,26 @@ class SR830(Instrument):
     # For consistency with other lock-in instrument classes
     adc4 = aux_in_4
 
+    # The SYNC command sets or queries the synchronous filter status. 
+    # The parameter i selects Off (i=0) or synchronous filtering below 200 Hz (i=1).
+    # Synchronous filtering is turned on only if the detection frequency 
+    # (reference x harmonic number) is less than 200 Hz.
+    filter_synchronous = Instrument.control(
+        "SYNC?", "SYNC %d",
+        "Turn on/off the synchronous filter",
+        validator=strict_discrete_set,
+        values={True: 1, False: 0},
+        map_values=True
+    )
+
+    buffer_counter = Instrument.measurement(
+        "SPTS?",
+        """ Queries the number of points stored in the buffer."""
+    )
+
+    def start(self):
+        self.write("STRT")
+
     def __init__(self, resourceName, **kwargs):
         super(SR830, self).__init__(
             resourceName,
@@ -328,6 +348,9 @@ class SR830(Instrument):
             frequency = discreteTruncate(frequency, SR830.SAMPLE_FREQUENCIES)
             index = SR830.SAMPLE_FREQUENCIES.index(frequency)
         self.write("SRAT%f" % index)
+
+    def trigger_by_bus(self):
+        self.write("SRAT 14")
 
     def aquireOnTrigger(self, enable=True):
         self.write("TSTR%d" % enable)
@@ -441,6 +464,9 @@ class SR830(Instrument):
             end = self.buffer_count
         return self.binary_values("TRCB?%d,%d,%d" % (
                         channel, start, end-start))
+    
+    def get_datas(self, channel=1, start=0, end=1):
+        return self.values("TRCA? {},{},{}".format(channel, start, end))
 
     def reset_buffer(self):
         self.write("REST")

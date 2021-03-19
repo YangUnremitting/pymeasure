@@ -139,7 +139,7 @@ class Keithley2420(Instrument):
         values=[10e-9, 3.15]
     )
 
-    current = Instrument.measurement(
+    read = Instrument.measurement(
         ":READ?",
         """ Reads the current in Amps, if configured for this reading.
         """
@@ -162,6 +162,17 @@ class Keithley2420(Instrument):
         values=[-210, 210]
     )
 
+    wires = Instrument.control(
+        ":SYSTEM:RSENSE?", ":SYSTEM:RSENSE %d",
+        """ An integer property that controls the number of wires in
+        use for resistance measurements, which can take the value of
+        2 or 4.
+        """,
+        validator=strict_discrete_set,
+        values={4: 1, 2: 0},
+        map_values=True
+    )
+    
     def measure_current(self, nplc=1, current=1.05e-4, auto_range=True):
         """ Configures the measurement of current.
 
@@ -177,6 +188,40 @@ class Keithley2420(Instrument):
         else:
             self.current_range = current
         self.check_errors()
+
+    def measure_voltage(self, nplc=1, voltage=21.0, auto_range=True):
+        """ Configures the measurement of voltage.
+
+        :param nplc: Number of power line cycles (NPLC) from 0.01 to 10
+        :param voltage: Upper limit of voltage in Volts, from -210 V to 210 V
+        :param auto_range: Enables auto_range if True, else uses the set voltage
+        """
+        log.info("%s is measuring voltage." % self.name)
+        self.write(":SENS:FUNC 'VOLT';"
+                   ":SENS:VOLT:NPLC %f;:FORM:ELEM VOLT;" % nplc)
+        if auto_range:
+            self.write(":SENS:VOLT:RANG:AUTO 1;")
+        else:
+            self.voltage_range = voltage
+        self.check_errors()
+
+    def measure_resistance(self, nplc=1, resistance=2.1e5, auto_range=True):
+        """ Configures the measurement of resistance.
+
+        :param nplc: Number of power line cycles (NPLC) from 0.01 to 10
+        :param resistance: Upper limit of resistance in Ohms, from -210 MOhms to 210 MOhms
+        :param auto_range: Enables auto_range if True, else uses the set resistance
+        """
+        log.info("%s is measuring resistance." % self.name)
+        self.write(":SENS:FUNC 'RES';"
+                   ":SENS:RES:MODE MAN;"
+                   ":SENS:RES:NPLC %f;:FORM:ELEM RES;" % nplc)
+        if auto_range:
+            self.write(":SENS:RES:RANG:AUTO 1;")
+        else:
+            self.resistance_range = resistance
+        self.check_errors()
+        
         
     def initiate(self):
         """ A property that allow user to set the awaiting trigger state. """
