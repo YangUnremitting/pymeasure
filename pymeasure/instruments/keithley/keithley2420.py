@@ -85,6 +85,29 @@ class Keithley2420(Instrument):
         values=[1, 2500]
     )
 
+    buffer_feed = Instrument.control(
+        ":TRAC:FEED?", ":TRAC:FEED %s",
+        """ Sepcifiy the reading source""",
+        validator=strict_discrete_set,
+        values={"Raw": "SENS", "Calc1": "CALC", "Calc2": "CALC2"},
+        map_values=True
+    )
+
+    buffer_feed_control = Instrument.control(
+        ":TRAC:FEED:CONT?", ":TRAC:FEED:CONT %s",
+        """ Start or stop the buffer""",
+        validator=strict_discrete_set,
+        values={"Enable": "NEXT", "Disable": "NEV"},
+        map_values=True
+    )
+
+    trigger_count = Instrument.control(
+        ":TRIG:COUN?", ":TRIG:COUN %d",
+        """ Trigger count must same ad the buffer points""",
+        validator=truncated_range,
+        values=[1, 2500]
+    )
+
     source_mode = Instrument.control(
         ":SOUR:FUNC?", ":SOUR:FUNC %s",
         """ A string property that controls the source mode, which can
@@ -120,7 +143,7 @@ class Keithley2420(Instrument):
         range in Amps, which can take values between -1.05 and +1.05 A.
         Auto-range is disabled when this property is set. """,
         validator=truncated_range,
-        values=[-1.05, 1.05]
+        values=[-3.15, 3.15]
     )
 
     compliance_voltage = Instrument.control(
@@ -159,7 +182,7 @@ class Keithley2420(Instrument):
         range in Volts, which can take values from -210 to 210 V.
         Auto-range is disabled when this property is set. """,
         validator=truncated_range,
-        values=[-210, 210]
+        values=[-63, 63]
     )
 
     wires = Instrument.control(
@@ -222,6 +245,9 @@ class Keithley2420(Instrument):
             self.resistance_range = resistance
         self.check_errors()
         
+    def buffer_clear(self):
+        """ Clear buffer"""
+        self.write(":TRAC:CLE")
         
     def initiate(self):
         """ A property that allow user to set the awaiting trigger state. """
@@ -249,3 +275,8 @@ class Keithley2420(Instrument):
         """ Disables the source of current or voltage depending on the
         configuration of the instrument. """
         self.write("OUTPUT OFF")
+
+    def buffer_status(self):
+        """ Check measurement event"""
+        status = self.values(":STAT:MEAS:COND?")
+        return status
