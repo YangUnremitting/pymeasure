@@ -155,10 +155,10 @@ class VISAAdapter(Adapter):
         self.connection.values_format.separator = separator
         self.connection.values_format.is_big_endian = is_big_endian
 
-    def wait_for_srq(self, timeout=25, delay=0.1):
+    def wait_for_srq(self, timeout=250, delay=0.1):
         """ Blocks until a SRQ, and leaves the bit high
 
         :param timeout: Timeout duration in seconds
         :param delay: Time delay between checking SRQ in seconds
         """
-        self.connection.wait_for_srq(timeout * 1000)
+        self.connection.wait_for_srq(timeout * 10000)
