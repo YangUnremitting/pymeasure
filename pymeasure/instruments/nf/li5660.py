@@ -1657,7 +1657,7 @@ class LI5660(Instrument):
             External: Rear panel TRIG IN signal
             Bus: Remote control *TRG or :TRIGger[:IMMediate] command, or the GET message """
         self.trigger_source = source
-        log.info("The triger source is set to {}".format(self.trigger_source))
+        # log.info("The triger source is set to {}".format(self.trigger_source))
 
     def get_status(self):
         """ Query for system status information """

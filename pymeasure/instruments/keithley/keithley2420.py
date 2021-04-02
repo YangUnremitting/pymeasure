@@ -168,6 +168,12 @@ class Keithley2420(Instrument):
         """
     )
 
+    current = Instrument.measurement(
+        ":READ?",
+        """ Reads the current in Amps, if configured for this reading.
+        """
+    )
+
     source_voltage = Instrument.control(
         ":SOUR:VOLT?", ":SOUR:VOLT:LEV %g",
         """ A floating point property that controls the source voltage

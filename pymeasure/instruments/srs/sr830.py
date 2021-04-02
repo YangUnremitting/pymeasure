@@ -23,8 +23,7 @@
 #
 
 from pymeasure.instruments import Instrument, discreteTruncate
-from pymeasure.instruments.validators import strict_discrete_set, \
-    truncated_discrete_set, truncated_range
+from pymeasure.instruments.validators import strict_discrete_set, truncated_discrete_set, truncated_range
 
 import numpy as np
 import time
@@ -462,8 +461,7 @@ class SR830(Instrument):
         """
         if end is None:
             end = self.buffer_count
-        return self.binary_values("TRCB?%d,%d,%d" % (
-                        channel, start, end-start))
+        return self.binary_values("TRCB?%d,%d,%d" % (channel, start, end-start))
     
     def get_datas(self, channel=1, start=0, end=1):
         return self.values("TRCA? {},{},{}".format(channel, start, end))
