@@ -234,7 +234,7 @@ class Keithley2000(Instrument, KeithleyBuffer):
     # Resistance (Ohm) #
     ####################
 
-    resistance = Instrument.measurement(":READ?",
+    resistance = Instrument.measurement(":INIT:CONT OFF; :READ?",
         """ Reads a resistance measurement in Ohms for both 2-wire and 4-wire
         configurations, based on the active :attr:`~.Keithley2000.mode`. """
     )

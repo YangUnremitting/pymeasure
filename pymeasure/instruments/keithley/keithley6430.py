@@ -36,11 +36,11 @@ class Keithley6430():
 
     def trigger(self):
         self.keithley.write(":TRAC:CLE;         \
-                        :SOUR:FUNC CURR;        \
-                        :SENS:FUNC 'VOLT';      \
+                        :SOUR:FUNC VOLT;        \
+                        :SENS:FUNC 'CURR';      \
                         :SENS:VOLT:NPLC 1;      \
                         :DISP:DIG 7;            \
-                        :FORM:ELEM VOLT;        \
+                        :FORM:ELEM CURR;        \
                         :TRAC:POIN 100;         \
                         :TRIG:COUN 100;         \
                         :TRAC:FEED SENS;        \

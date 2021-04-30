@@ -201,7 +201,34 @@ class Keithley2420(Instrument):
         values={4: 1, 2: 0},
         map_values=True
     )
-    
+
+    def auto_range_source(self):
+        """ Configures the source to use an automatic range.
+        """
+        if self.source_mode == 'current':
+            self.write(":SOUR:CURR:RANG:AUTO 1")
+        else:
+            self.write(":SOUR:VOLT:RANG:AUTO 1")
+
+    def apply_voltage(self, voltage_range=None,
+                      compliance_current=0.1):
+        """ Configures the instrument to apply a source voltage, and
+        uses an auto range unless a voltage range is specified.
+        The compliance current is also set.
+
+        :param compliance_current: A float in the correct range for a
+                                   :attr:`~.Keithley2400.compliance_current`
+        :param voltage_range: A :attr:`~.Keithley2400.voltage_range` value or None
+        """
+        log.info("%s is sourcing voltage." % self.name)
+        self.source_mode = 'voltage'
+        if voltage_range is None:
+            self.auto_range_source()
+        else:
+            self.source_voltage_range = voltage_range
+        self.compliance_current = compliance_current
+        self.check_errors()
+
     def measure_current(self, nplc=1, current=1.05e-4, auto_range=True):
         """ Configures the measurement of current.
 
