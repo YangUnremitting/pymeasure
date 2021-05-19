@@ -201,6 +201,19 @@ class Keithley2420(Instrument):
         values={4: 1, 2: 0},
         map_values=True
     )
+    
+    data_elements = Instrument.control(
+        ":FORM:ELEM?", ":FORM:ELEM %s",
+        """Specify data elements for data string. """,
+        validator=truncated_discrete_set,
+        values={
+            "Voltage": "VOLT",
+            "Current": "CURR",
+            "Resistance": "RES",
+            "Time": "TIME",
+            "Status": "STAT"},
+        map_values=True
+    )
 
     def auto_range_source(self):
         """ Configures the source to use an automatic range.
